@@ -1,40 +1,48 @@
-const puppeteer = require('puppeteer');
-const storage = require('node-persist');
+import puppeteer from 'puppeteer';
+import storage from 'node-persist';
 
 async function getData() {
-sentElements = []
-elements = []
-  const browser = await puppeteer.launch({ headless: true });  
-  const page = await browser.newPage();
-  await page.goto('https://ktu.edu.in/academics/notification');
-  Unproccesedelements=  await page.$$('h6.f-w-bold')
-  for (let element of Unproccesedelements) {
-    const text = await element.evaluate(el => el.innerText);  
-    await elements.push(text)
-}
-  await browser.close();
-     pastElement= await storage.getItem('last')
-  
-     if(pastElement!= elements[0]){
-     console.log("nowdefined")
-     for(let el of elements){
-            if(el !=pastElement){
-                sentElements.push(el)
-            }else{
-                break
-            }
-     }
-     storage.setItem('last', elements[0]);
-  
-     }else{
-     newElement= storage.getItem('last')
-     console.log("Already Build")
+    let elementsToPost = [];
+    let elements = [];
+
+    await storage.init(); 
+
+    const browser = await puppeteer.launch({ headless: true });  
+    const page = await browser.newPage();
+    await page.goto('https://ktu.edu.in/academics/notification');
+
+    const rawElements = await page.$$('h6.f-w-bold');
+
+    // Finds all h6 tagged componenets ,appends to elements 
+    for (let element of rawElements) {
+        const text = await element.evaluate(el => el.innerText);  
+        elements.push(text);
+    }
+
+    await browser.close();
+
     
+    let oldElement = await storage.getItem('last');  
+
+    if (oldElement !== elements[0]) {
+        console.log("New announcements found!");
+
+        // Loop through new elements until the old element is found
+        for (let el of elements) {
+            if (el !== oldElement) {
+                elementsToPost.push(el);
+            } else {
+                break;
+            }
+        }
+
+        
+        await storage.setItem('last', elements[0]);
+    } else {
+        console.log("No new announcements.");
+    }
+
+    return elementsToPost;
 }
 
-  
-     return sentElements
-}
-
-
-module.exports = {getData}
+export default getData;

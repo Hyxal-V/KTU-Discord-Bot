@@ -1,15 +1,15 @@
 {
   "name": "ktu_discord_bot",
   "version": "1.0.0",
+  "type": "module",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "start": "nodemon index.js",
+    "dev":"nodemon index.js"
   },
-  "keywords": [],
-  "author": "Hyxal",
-  "license": "ISC",
-  "description": "",
   "dependencies": {
+    "discord.js": "^14.17.3",
+    "dotenv": "^16.4.7",
     "node-persist": "^4.0.4",
     "puppeteer": "^24.1.1"
   }
